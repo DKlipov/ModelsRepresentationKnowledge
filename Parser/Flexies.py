@@ -29,6 +29,10 @@ class PartCY(DictionaryEntity):
         return Part_of_speech[self.part_speech] + ", " + Genders[self.part_gender] + ", " + Cases[
             self.part_case] + ", " + Numbers[self.part_number]
 
+    def syn(self, find_item):
+        return self.part_gender == find_item.gender and self.part_case == find_item.case and \
+               self.part_number == find_item.number and find_item.type_change in self.types_change
+
 
 class PartKP(DictionaryEntity):
 
@@ -42,6 +46,10 @@ class PartKP(DictionaryEntity):
     def to_string(self):
         return Part_of_speech[self.part_speech] + ", " + Genders[self.part_gender] + ", " + Numbers[
             self.part_number]
+
+    def syn(self, find_item):
+        return self.part_gender == find_item.gender and self.part_number == find_item.number and \
+               find_item.type_change in self.types_change
 
 
 class PartDE(DictionaryEntity):
@@ -74,6 +82,10 @@ class PartGL(DictionaryEntity):
         return Part_of_speech[self.part_speech] + ", " + Times[self.part_time] + ", " + Persons[
             self.part_person] + ", " + Genders[self.part_gender] + ", " + Numbers[self.part_number] + ", " + Aspect[
                    self.part_aspect]
+
+    def syn(self, find_item):
+        return self.part_gender == find_item.gender and self.part_number == find_item.number and \
+               find_item.type_change in self.types_change
 
 
 flexions_by_type = {"СУ": PartCY, "ПП": PartCY, "КП": PartKP, "ДЕ": PartDE, "ГЛ": PartGL}
@@ -113,3 +125,12 @@ class FlexiesDict(object):
             return list1[0]
         else:
             return None
+
+    def synthesis(self, find_item):
+        for key in self.dict.keys():
+            flex = self.dict[key]
+            list1 = list(
+                filter(lambda x: x.part_speech == find_item.part and x.syn(find_item), flex.parts))
+            if len(list1) > 0:
+                return key.replace("_", "")
+        return None

@@ -10,11 +10,17 @@ class DictionaryEntity(ABC):
     def to_string(self) -> str:
         pass
 
+    def syn(self, find_item):
+        return False
+
 
 class Dictionary(ABC):
     @abstractmethod
     def find(self, word) -> DictionaryEntity:
         pass
+
+    def synthesis(self, findItem):
+        return None
 
 
 class BaseEntity(DictionaryEntity):
@@ -79,6 +85,21 @@ class BaseDict(Dictionary):
         f.close()
         self.flexies = flexies
 
+    @staticmethod
+    def concat(word):
+        return word.quaziBase + word.canonic_form
+
+    def synthesis(self, findItem):
+        for key in self.dict.keys():
+            for word in self.dict[key]:
+                if self.concat(word) == findItem.base_form and (findItem.part == word.part_speech):
+                    findItem.type_change = word.type_change
+                    for flex in self.flexies:
+                        flexie = flex.synthesis(findItem)
+                        if flexie is not None:
+                            return word.quaziBase + flexie
+        return None
+
     def find(self, word):
         for flex in self.flexies:
             a = word
@@ -128,3 +149,13 @@ class GlueWordDict(object):
             if gw in input_str:
                 input_str = input_str.replace(gw, self.dict[gw])
         return input_str
+
+
+class FindItem(object):
+
+    def __init__(self, base_form, part, gender, number, case) -> None:
+        self.base_form = base_form
+        self.gender = gender
+        self.number = number
+        self.case = case
+        self.part = part
